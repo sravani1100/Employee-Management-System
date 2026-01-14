@@ -1,0 +1,37 @@
+
+services :
+  mysql:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: employee
+      MYSQL_USER: sravani
+      MYSQL_PASSWORD: 1234
+      MYSQL_DATABASE: employee
+    ports:
+      - "3303:3306"
+    networks:
+      - e-network
+    volumes:
+      - mysql-e-data:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pemployee" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    ports:
+      - "8090:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - e-network
+
+networks:
+  e-network:
+    driver: bridge
+
+volumes:
+  mysql-e-data:
